@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Course } = require('../models');
 const authenticate = require('./authenticateUser');
+const { check, validationResult } = require('express-validator');
 
 // GET list of courses
 router.get('/', (req, res, next) => {
@@ -35,7 +36,20 @@ router.get('/:id', (req, res, next) => {
 });
 
 // POST create course
-router.post('/', authenticate, (req, res, next) => {
+router.post('/', authenticate, [
+  check('title')
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage('Please enter a course title'),
+  check('description')
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage('Please enter a course description')
+], (req, res, next) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { id } = req.currentUser;
     req.body.userId = id;
 
@@ -59,7 +73,15 @@ router.post('/', authenticate, (req, res, next) => {
 });
 
 // PUT update course
-router.put('/:id', authenticate, (req, res, next) => {
+router.put('/:id', authenticate, [
+    check('title')
+      .exists({ checkNull: true, checkFalsy: true })
+      .withMessage('Please enter a course title'),
+    check('description')
+      .exists({ checkNull: true, checkFalsy: true })
+      .withMessage('Please enter a course description')
+  ], (req, res, next) => {
+      
     const { id } = req.currentUser;
 
     Course.findByPk(req.params.id)

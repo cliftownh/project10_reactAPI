@@ -699,6 +699,11 @@ input:focus {
 .button:focus {
   outline: none;
 }
+
+.button:hover {
+  cursor: pointer;
+}
+
 /* line 522, ../sass/global.sass */
 .button:not(.button-secondary):hover {
   background: #63537d;

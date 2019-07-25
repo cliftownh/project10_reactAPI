@@ -1,10 +1,10 @@
-import React from 'react';
-import { Consumer } from './Context';
+import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-// import axios from 'axios';
+import axios from 'axios';
 
-const CourseDetail = ({match}) => {
-    let id = (match.params.id - 1);
+export default class CourseDetail extends Component {
+    // let { id } = match.params;
+    // console.log(id);
 
     // let users;
 
@@ -15,66 +15,92 @@ const CourseDetail = ({match}) => {
 
     // console.log(users);
 
+
+  constructor(props) {
+    super();
+    this.state = {
+        course: {},
+        courseURL: props.match.url,
+    };
+  }
+
+  componentDidMount() {
+    this.getCourse()
+  }
+
+  getCourse() {
+    axios.get(`http://localhost:5000/api${this.state.courseURL}`)
+    .then(res => {
+      this.setState({course: res.data});
+    }).catch((err) => console.log(err));
+  }
+
+  render() {
+    const course = this.state.course;
+    
+    let list;
+    let materials;
+    
+    if (course.materialsNeeded) {
+      if (course.materialsNeeded.includes(',')) {
+        materials = course.materialsNeeded.split(',');
+      }
+
+      list = materials.map((li) =>
+        <li key={materials.indexOf(li)}>{li}</li>
+      );
+    }
+
     return (
-        <Consumer>
-            { context => {
-                const course = context[id];
-
-                return (
-                    <div>
-                    <div className="actions--bar">
-                      <div className="bounds">
-                        <div className="grid-100">
-                          <span>
-                            <Link to={`/courses/${course.id}/update`} className="button">Update Course</Link>
-                            <Link to="/" className="button">Delete Course</Link>
-                          </span>
-                          <Link to="/" className="button button-secondary">Return to List</Link>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bounds course--detail">
-                      <div className="grid-66">
-                        <div className="course--header">
-                          <h4 className="course--label">Course</h4>
-                          <h3 className="course--title">{course.title}</h3>
-                          <p>By Joe Smith</p>
-                        </div>
-                        <div className="course--description">
-                          <p>{course.description}</p>
-                        </div>
-                      </div>
-                      <div className="grid-25 grid-right">
-                        <div className="course--stats">
-                          <ul className="course--stats--list">
-                            <li className="course--stats--list--item">
-                              <h4>Estimated Time</h4>
-                              <h3>{course.estimatedTime}</h3>
-                            </li>
-                            <li className="course--stats--list--item">
-                              <h4>Materials Needed</h4>
-                              <ul>
-                                <li>1/2 x 3/4 inch parting strip</li>
-                                <li>1 x 2 common pine</li>
-                                <li>1 x 4 common pine</li>
-                                <li>1 x 10 common pine</li>
-                                <li>1/4 inch thick lauan plywood</li>
-                                <li>Finishing Nails</li>
-                                <li>Sandpaper</li>
-                                <li>Wood Glue</li>
-                                <li>Wood Filler</li>
-                                <li>Minwax Oil Based Polyurethane</li>
-                              </ul>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-            }}
-        </Consumer>
+        <div>
+        <div className="actions--bar">
+          <div className="bounds">
+            <div className="grid-100">
+              <span>
+                <Link to={`/courses/${course.id}/update`} className="button">Update Course</Link>
+                <Link to="/" className="button">Delete Course</Link>
+              </span>
+              <Link to="/" className="button button-secondary">Return to List</Link>
+            </div>
+          </div>
+        </div>
+        <div className="bounds course--detail">
+          <div className="grid-66">
+            <div className="course--header">
+              <h4 className="course--label">Course</h4>
+              <h3 className="course--title">{course.title}</h3>
+              <p>by User ID: {course.userId}</p>
+            </div>
+            <div className="course--description">
+              <p>{course.description}</p>
+            </div>
+          </div>
+          <div className="grid-25 grid-right">
+            <div className="course--stats">
+              <ul className="course--stats--list">
+                {
+                  (course.estimatedTime)
+                  ? <li className="course--stats--list--item">
+                      <h4>Estimated Time</h4>
+                      <h3>{course.estimatedTime}</h3>
+                    </li>
+                  : ''
+                }
+                {
+                  (course.materialsNeeded)
+                  ? <li className="course--stats--list--item">
+                      <h4>Materials Needed</h4>
+                      <ul>
+                        { list }
+                      </ul>
+                    </li>
+                  : ''
+                }
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
     );
+  }
 }
-
-export default CourseDetail;
