@@ -7,7 +7,7 @@ export default class UserSignUp extends Component {
   state = {
     firstName: '',
     lastName: '',
-    email: '',
+    emailAddress: '',
     password: '',
     errors: [],
   }
@@ -16,7 +16,7 @@ export default class UserSignUp extends Component {
     const {
       firstName,
       lastName,
-      email,
+      emailAddress,
       password,
       errors,
     } = this.state;
@@ -47,10 +47,10 @@ export default class UserSignUp extends Component {
                   onChange={this.change} 
                   placeholder="Last Name" />
                 <input 
-                  id="email" 
-                  name="email" 
+                  id="emailAddress" 
+                  name="emailAddress" 
                   type="text"
-                  value={email} 
+                  value={emailAddress} 
                   onChange={this.change} 
                   placeholder="Email Address" />
                 <input 
@@ -87,7 +87,7 @@ export default class UserSignUp extends Component {
       const {
         firstName,
         lastName,
-        email,
+        emailAddress,
         password,
       } = this.state;
 
@@ -95,7 +95,7 @@ export default class UserSignUp extends Component {
       const user = {
           firstName,
           lastName,
-          email,
+          emailAddress,
           password
       }
 
