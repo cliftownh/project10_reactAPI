@@ -6,11 +6,12 @@ const authenticate = require('./authenticateUser');
 const { check, validationResult } = require('express-validator');
 
 router.get('/', authenticate, (req, res) => {
-    const { firstName, lastName, emailAddress } = req.currentUser;
+    const { id, firstName, lastName, emailAddress } = req.currentUser;
 
     res.json({
+        id: id,
         name: `${firstName} ${lastName}`,
-        email: emailAddress
+        username: emailAddress
     });
 });
 

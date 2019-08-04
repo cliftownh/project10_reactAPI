@@ -5,19 +5,24 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
 // Import components
 import Header from './components/Header';
+import Authenticated from './components/Authenticated';
 import Courses from './components/Courses';
 import CourseDetail from './components/CourseDetail';
-// import CreateCourse from './components/CreateCourse';
+import CreateCourse from './components/CreateCourse';
 import UserSignIn from './components/UserSignIn';
 import UserSignUp from './components/UserSignUp';
+import UserSignOut from './components/UserSignOut';
 import NotFound from './components/NotFound';
 
-// set up Context
 import withContext from './components/Context';
+import PrivateRoute from './PrivateRoute';
 
 const HeaderWithContext = withContext(Header);
+const AuthWithContext = withContext(Authenticated);
 const UserSignUpWithContext = withContext(UserSignUp);
 const UserSignInWithContext = withContext(UserSignIn);
+const UserSignOutWithContext = withContext(UserSignOut);
+const CreateCourseWithContext = withContext(CreateCourse);
 
 export default class App extends Component {
 
@@ -36,10 +41,12 @@ export default class App extends Component {
 
           <Switch>
             <Route exact path="/" component={Courses} />
-            <Route path="/courses/:id" component={CourseDetail} />
-            {/* <Route path="/courses/create" component={CreateCourse} /> */}
+            <PrivateRoute path="/authenticated" component={AuthWithContext} />
+            <PrivateRoute exact path="/courses/create" component={CreateCourseWithContext} />
+            <Route exact path="/courses/:id" component={CourseDetail} />
             <Route path="/signin" component={UserSignInWithContext} />
             <Route path="/signup" component={UserSignUpWithContext} />
+            <Route path="/signout" component={UserSignOutWithContext} />
             <Route path="/error" component={NotFound} />
           </Switch>
         </div>
