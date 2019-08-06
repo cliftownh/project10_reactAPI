@@ -82,7 +82,7 @@ export default class CreateCourse extends Component {
                                             name="materialsNeeded" 
                                             value={materialsNeeded} 
                                             onChange={this.change}
-                                            placeholder="List materials..." />
+                                            placeholder="List materials (Seperated by commas)" />
                                         </div>
                                     </li>
                                 </ul>
@@ -116,7 +116,7 @@ export default class CreateCourse extends Component {
             materialsNeeded
           } = this.state;
     
-          // New user payload
+          // New course payload
           const course = {
             title,
             description,
@@ -131,13 +131,13 @@ export default class CreateCourse extends Component {
           }
     
           context.data.createCourse(course, credentials)
-          .then( res => {
-              if (res.status !== 201) {
-                this.setState({ errors: res });
+          .then( response => {
+              if (response.status !== 201) {
+                this.setState({ errors: response });
                 console.log(this.state.errors);
               } else {
                 this.props.history.push('/');
-                return res;
+                return response;
               }
           }).catch( err => {
               console.log(err);

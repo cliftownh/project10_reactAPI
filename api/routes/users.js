@@ -5,14 +5,41 @@ const bcrypt = require('bcryptjs');
 const authenticate = require('./authenticateUser');
 const { check, validationResult } = require('express-validator');
 
-router.get('/', authenticate, (req, res) => {
-    const { id, firstName, lastName, emailAddress } = req.currentUser;
+// GET currently authenticated user
+router.get('/', authenticate, (req, res, next) => {
+    if (!req.currentUser) {
+        const error = new Error('No user is signed in.')
+        error.status = 400;
+        next(error);
+    } else {
+        const { id, firstName, lastName, emailAddress } = req.currentUser;
 
-    res.json({
-        id: id,
-        name: `${firstName} ${lastName}`,
-        username: emailAddress
-    });
+        res.json({
+            id: id,
+            name: `${firstName} ${lastName}`,
+            username: emailAddress
+        });
+    }
+});
+
+// GET user by id
+router.get('/:id', (req, res, next) => {
+    User.findByPk(req.params.id, 
+        { attributes: { exclude: ['password', 'createdAt', 'updatedAt'] } })
+    .then((user) => {
+        if (user) {
+            const { id, firstName, lastName, emailAddress } = user;
+            res.json({
+                id: id,
+                name: `${firstName} ${lastName}`,
+                username: emailAddress
+            });
+        } else {
+            const error = new Error('No user was found.');
+            error.status = 404;
+            next(error);
+        }
+    }).catch(err => res.json(err));
 });
 
 // POST create user

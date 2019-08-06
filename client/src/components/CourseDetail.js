@@ -3,25 +3,11 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 export default class CourseDetail extends Component {
-    // let { id } = match.params;
-    // console.log(id);
-
-    // let users;
-
-    // axios.get('http://localhost:5000/api/users/all')
-    // .then(res => {
-    //   users = res.data;
-    // }).catch((err) => console.log(err));
-
-    // console.log(users);
-
-
-  constructor(props) {
-    super();
-    this.state = {
-        course: {},
-        courseURL: props.match.url,
-    };
+  state = {
+    authUser: this.props.context.authenticatedUser.user,
+    course: {},
+    creator: {},
+    courseURL: this.props.match.url
   }
 
   componentDidMount() {
@@ -30,16 +16,29 @@ export default class CourseDetail extends Component {
 
   getCourse() {
     axios.get(`http://localhost:5000/api${this.state.courseURL}`)
-    .then(res => {
-      this.setState({course: res.data});
+    .then(response => {
+      this.setState({course: response.data});
+      this.getCreator();
     }).catch((err) => console.log(err));
   }
 
+  getCreator() {
+    axios.get(`http://localhost:5000/api/users/${this.state.course.userId}`)
+    .then( response => {
+        this.setState({creator: response.data});
+    }).catch((err) => console.log(err));
+}
+
   render() {
-    const course = this.state.course;
+    const { authUser, course, creator, courseURL } = this.state;
     
     let list;
     let materials;
+    let isCreator = false;
+
+    if (authUser.id === creator.id) {
+      isCreator = true;
+    }
     
     if (course.materialsNeeded) {
       if (course.materialsNeeded.includes(',')) {
@@ -56,10 +55,14 @@ export default class CourseDetail extends Component {
         <div className="actions--bar">
           <div className="bounds">
             <div className="grid-100">
-              <span>
-                <Link to={`/courses/${course.id}/update`} className="button">Update Course</Link>
-                <Link to="/" className="button">Delete Course</Link>
-              </span>
+
+              {isCreator ? 
+                <span>
+                  <Link to={`${courseURL}/update`} className="button">Update Course</Link>
+                  <Link to="/" className="button">Delete Course</Link>
+                </span>
+                : null
+              }
               <Link to="/" className="button button-secondary">Return to List</Link>
             </div>
           </div>
@@ -69,7 +72,7 @@ export default class CourseDetail extends Component {
             <div className="course--header">
               <h4 className="course--label">Course</h4>
               <h3 className="course--title">{course.title}</h3>
-              <p>by User ID: {course.userId}</p>
+              <p>by {creator.name}</p>
             </div>
             <div className="course--description">
               <p>{course.description}</p>
@@ -84,7 +87,7 @@ export default class CourseDetail extends Component {
                       <h4>Estimated Time</h4>
                       <h3>{course.estimatedTime}</h3>
                     </li>
-                  : ''
+                  : null
                 }
                 {
                   (course.materialsNeeded)
@@ -94,7 +97,7 @@ export default class CourseDetail extends Component {
                         { list }
                       </ul>
                     </li>
-                  : ''
+                  : null
                 }
               </ul>
             </div>
