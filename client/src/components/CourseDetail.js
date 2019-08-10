@@ -3,23 +3,44 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 export default class CourseDetail extends Component {
-  state = {
-    authUser: this.props.context.authenticatedUser.user,
-    course: {},
-    creator: {},
-    courseURL: this.props.match.url
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      authUser: {},
+      course: {},
+      creator: {},
+      deleteClicked: false,
+      courseURL: props.match.url,
+      errors: []
+    }
+    
+    this.deleteButton = this.deleteButton.bind(this);
+    this.delete = this.delete.bind(this);
   }
 
+
   componentDidMount() {
-    this.getCourse()
+    if (this.props.context.authenticatedUser) {
+      this.setState({authUser: this.props.context.authenticatedUser.user});
+    }
+    this.getCourse();
   }
 
   getCourse() {
     axios.get(`http://localhost:5000/api${this.state.courseURL}`)
     .then(response => {
-      this.setState({course: response.data});
-      this.getCreator();
-    }).catch((err) => console.log(err));
+      if (response.status !== 200) {
+        this.setState({ errors: response });
+      } else {
+        this.setState({ course: response.data });
+        this.getCreator();
+      }
+    }).catch((err) => {
+      console.log(err);
+      this.props.history.push('/notfound');
+    });
   }
 
   getCreator() {
@@ -27,14 +48,18 @@ export default class CourseDetail extends Component {
     .then( response => {
         this.setState({creator: response.data});
     }).catch((err) => console.log(err));
-}
+  }
+
+  deleteButton() {
+    this.setState(prevState => ({ deleteClicked: !prevState.deleteClicked }));
+  }
 
   render() {
-    const { authUser, course, creator, courseURL } = this.state;
-    
     let list;
     let materials;
     let isCreator = false;
+    const { authUser, course, creator, courseURL } = this.state;
+    const { deleteClicked } = this.state;
 
     if (authUser.id === creator.id) {
       isCreator = true;
@@ -56,13 +81,22 @@ export default class CourseDetail extends Component {
           <div className="bounds">
             <div className="grid-100">
 
-              {isCreator ? 
+              {deleteClicked ? (
                 <span>
-                  <Link to={`${courseURL}/update`} className="button">Update Course</Link>
-                  <Link to="/" className="button">Delete Course</Link>
+                  <p>Are you sure you want to delete this course?</p>
+                  <button className="button" onClick={this.delete}>Yes</button>
+                  <button className="button" onClick={this.deleteButton}>No</button>
                 </span>
-                : null
-              }
+              ) : (
+                <span>
+                  {isCreator ? (
+                    <span>
+                      <Link to={`${courseURL}/update`} className="button">Update Course</Link>
+                      <button className="button" onClick={this.deleteButton}>Delete Course</button>
+                    </span>
+                  ) : null }
+                </span>
+              )}
               <Link to="/" className="button button-secondary">Return to List</Link>
             </div>
           </div>
@@ -106,4 +140,28 @@ export default class CourseDetail extends Component {
       </div>
     );
   }
+
+  delete = () => {
+
+    const { course } = this.state;
+
+    const credentials = {
+        username: this.props.context.authenticatedUser.user.username,
+        password: this.props.context.authenticatedUser.password
+    }
+
+    this.props.context.data.delete(course, credentials)
+    .then( response => {
+        if (response.status !== 204) {
+          this.setState({ errors: response });
+          console.log(this.state.errors);
+        } else {
+          this.props.history.push('/');
+          return response;
+        }
+    }).catch( err => {
+        console.log(err);
+        this.props.history.push('/error');
+    });
+}
 }

@@ -1,16 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-export default class Header extends React.PureComponent {
-  render() {
-    const { context } = this.props;
-    let authUser = context.authenticatedUser;
+export default ({ context }) => {
 
-    if (context.authenticatedUser) {
-      authUser = context.authenticatedUser.user;
-    }
-     
-    return (
+  let authUser = context.authenticatedUser;
+
+  if (authUser) {
+    authUser = context.authenticatedUser.user;
+  }
+
+  return (
       <div className="header">
         <div className="bounds">
           <h1 className="header--logo">Courses</h1>
@@ -29,6 +28,5 @@ export default class Header extends React.PureComponent {
           </nav>
         </div>
       </div>
-    );
-  }
-};
+  );
+}

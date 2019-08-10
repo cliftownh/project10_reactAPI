@@ -134,7 +134,6 @@ export default class CreateCourse extends Component {
           .then( response => {
               if (response.status !== 201) {
                 this.setState({ errors: response });
-                console.log(this.state.errors);
               } else {
                 this.props.history.push('/');
                 return response;

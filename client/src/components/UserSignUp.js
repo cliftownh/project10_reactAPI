@@ -103,6 +103,7 @@ export default class UserSignUp extends Component {
       .then( errors => {
           if (errors) {
               this.setState({ errors });
+              console.log(this.state.errors);
           } else {
               context.actions.signIn(emailAddress, password)
               .then( () => {

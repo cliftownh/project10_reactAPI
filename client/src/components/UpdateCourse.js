@@ -22,25 +22,33 @@ export default class UpdateCourse extends Component {
     getCourse() {
         axios.get(`http://localhost:5000/api${this.state.courseURL}`)
         .then(response => {
-          const course = response.data;
-          if (this.state.authUser.id !== course.userId) {
-            this.props.history.push('/forbidden');
-            return null;
+          if (response.status !== 200) {
+              this.setState({ errors: response });
+              console.log(this.state.errors);
+          } else {
+            const course = response.data;
+            if (this.state.authUser.id !== course.userId) {
+                this.props.history.push('/forbidden');
+                return null;
+            }
+            if (course.estimatedTime === null) {
+                course.estimatedTime = '';
+            }
+            if (course.materialsNeeded === null) {
+                course.materialsNeeded = '';
+            }
+            this.setState({
+                title: course.title,
+                description: course.description,
+                estimatedTime: course.estimatedTime,
+                materialsNeeded: course.materialsNeeded,
+                userId: course.userId
+            });
           }
-          if (course.estimatedTime === null) {
-              course.estimatedTime = '';
-          }
-          if (course.materialsNeeded === null) {
-            course.materialsNeeded = '';
-          }
-          this.setState({
-              title: course.title,
-              description: course.description,
-              estimatedTime: course.estimatedTime,
-              materialsNeeded: course.materialsNeeded,
-              userId: course.userId
-          });
-        }).catch((err) => console.log(err));
+        }).catch((err) => {
+            console.log(err);
+            this.props.history.push('/notfound');
+        });
     }
 
 
@@ -169,7 +177,6 @@ export default class UpdateCourse extends Component {
           .then( response => {
               if (response.status !== 204) {
                 this.setState({ errors: response });
-                console.log(this.state.errors);
               } else {
                 this.props.history.push(`/courses/${id}`);
                 return response;
