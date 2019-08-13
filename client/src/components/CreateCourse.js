@@ -82,7 +82,7 @@ export default class CreateCourse extends Component {
                                             name="materialsNeeded" 
                                             value={materialsNeeded} 
                                             onChange={this.change}
-                                            placeholder="List materials (Seperated by commas)" />
+                                            placeholder="List materials (Seperated by an asterisk and new line)" />
                                         </div>
                                     </li>
                                 </ul>

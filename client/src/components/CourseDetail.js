@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import Markdown from 'react-markdown';
 import axios from 'axios';
 
 export default class CourseDetail extends Component {
@@ -13,19 +14,20 @@ export default class CourseDetail extends Component {
       creator: {},
       deleteClicked: false,
       courseURL: props.match.url,
-      errors: []
+      errors: [],
+      loading: true
     }
     
     this.deleteButton = this.deleteButton.bind(this);
     this.delete = this.delete.bind(this);
   }
 
-
   componentDidMount() {
     if (this.props.context.authenticatedUser) {
       this.setState({authUser: this.props.context.authenticatedUser.user});
     }
     this.getCourse();
+    this.props.context.from = this.props.location.pathname;
   }
 
   getCourse() {
@@ -34,7 +36,7 @@ export default class CourseDetail extends Component {
       if (response.status !== 200) {
         this.setState({ errors: response });
       } else {
-        this.setState({ course: response.data });
+        this.setState({ course: response.data, loading: false });
         this.getCreator();
       }
     }).catch((err) => {
@@ -55,27 +57,30 @@ export default class CourseDetail extends Component {
   }
 
   render() {
-    let list;
-    let materials;
-    let isCreator = false;
+    // let list;
+    // let materials;
+    // let isCreator = false;
     const { authUser, course, creator, courseURL } = this.state;
     const { deleteClicked } = this.state;
 
-    if (authUser.id === creator.id) {
-      isCreator = true;
-    }
+    // if (authUser.id === creator.id) {
+    //   isCreator = true;
+    // }
     
-    if (course.materialsNeeded) {
-      if (course.materialsNeeded.includes(',')) {
-        materials = course.materialsNeeded.split(',');
-      }
+    // if (course.materialsNeeded) {
+    //   if (course.materialsNeeded.includes(',')) {
+    //     materials = course.materialsNeeded.split(',');
+    //   }
 
-      list = materials.map((li) =>
-        <li key={materials.indexOf(li)}>{li}</li>
-      );
-    }
-
+    //   list = materials.map((li) =>
+    //     <li key={materials.indexOf(li)}>{li}</li>
+    //   );
+    // }
+    
     return (
+        (this.state.loading)
+        ? null
+        :
         <div>
         <div className="actions--bar">
           <div className="bounds">
@@ -89,7 +94,7 @@ export default class CourseDetail extends Component {
                 </span>
               ) : (
                 <span>
-                  {isCreator ? (
+                  {authUser.id === course.userId ? (
                     <span>
                       <Link to={`${courseURL}/update`} className="button">Update Course</Link>
                       <button className="button" onClick={this.deleteButton}>Delete Course</button>
@@ -109,30 +114,20 @@ export default class CourseDetail extends Component {
               <p>by {creator.name}</p>
             </div>
             <div className="course--description">
-              <p>{course.description}</p>
+              <Markdown source={course.description} />
             </div>
           </div>
           <div className="grid-25 grid-right">
             <div className="course--stats">
               <ul className="course--stats--list">
-                {
-                  (course.estimatedTime)
-                  ? <li className="course--stats--list--item">
-                      <h4>Estimated Time</h4>
-                      <h3>{course.estimatedTime}</h3>
-                    </li>
-                  : null
-                }
-                {
-                  (course.materialsNeeded)
-                  ? <li className="course--stats--list--item">
-                      <h4>Materials Needed</h4>
-                      <ul>
-                        { list }
-                      </ul>
-                    </li>
-                  : null
-                }
+                 <li className="course--stats--list--item">
+                    <h4>Estimated Time</h4>
+                    <h3>{course.estimatedTime}</h3>
+                  </li>
+                  <li className="course--stats--list--item">
+                    <h4>Materials Needed</h4>
+                    <Markdown source={course.materialsNeeded} />
+                  </li>
               </ul>
             </div>
           </div>

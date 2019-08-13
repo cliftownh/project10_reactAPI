@@ -70,17 +70,13 @@ router.post('/', [
     };
 
     if (!isValidEmail(emailAddress)) {
-        const error = new Error('Must be a valid email address.')
-        error.status = 400;
-        next(error);
+        return res.status(400).json({errors: ['This is not a valid email address']});
     } else {
         User.findAll({ attributes: ['emailAddress'] })
         .then((emails) => {
             for (let i = 0; i < emails.length; i++ ) {
-                if (emails[i].emailAddress === emailAddress) {
-                    const error = new Error('This email address belongs to an existing user.')
-                    error.status = 400;
-                    next(error);
+                if (emails[i].emailAddress === emailAddress) {                    
+                    return res.status(400).json({errors: ['This email address belongs to an existing user.']})
                 }
             }
         })
