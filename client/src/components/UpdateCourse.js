@@ -12,7 +12,8 @@ export default class UpdateCourse extends Component {
         estimatedTime: '',
         materialsNeeded: '',
         userId: '',
-        errors: []
+        errors: [],
+        loading: true,
     }
 
     componentDidMount() {
@@ -27,22 +28,29 @@ export default class UpdateCourse extends Component {
               console.log(this.state.errors);
           } else {
             const course = response.data;
+            console.log(this.state.authUser.id, course.userId)
             if (this.state.authUser.id !== course.userId) {
                 this.props.history.push('/forbidden');
                 return null;
             }
-            if (course.estimatedTime === null) {
-                course.estimatedTime = '';
+            if (this.props.context.authenticatedUser.user.id !== this.state.courseCreatorId) {
+                // Check CourseCreatorId against Authenticated User's id to verify permission to access page.
+                this.props.history.push('/forbidden')
             }
             if (course.materialsNeeded === null) {
                 course.materialsNeeded = '';
+            }
+            if (course.userId !== this.state.authUser) {
+                // course userId property against Authenticated User's id to verify permission to access page.
+                this.props.history.push('/forbidden')
             }
             this.setState({
                 title: course.title,
                 description: course.description,
                 estimatedTime: course.estimatedTime,
                 materialsNeeded: course.materialsNeeded,
-                userId: course.userId
+                userId: course.userId,
+                loading: false,
             });
           }
         }).catch((err) => {
@@ -64,6 +72,9 @@ export default class UpdateCourse extends Component {
         } = this.state;
         
         return (
+            (this.state.loading)
+            ? null
+            : 
             <div className="bounds course--detail">
                 <h1>Update Course</h1>
                 <div>
